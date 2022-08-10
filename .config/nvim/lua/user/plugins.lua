@@ -95,6 +95,9 @@ return packer.startup(function(use)
   -- Surround
   use "tpope/vim-surround"
 
+  -- CSV
+  use "chrisbra/csv.vim"
+
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
   if PACKER_BOOTSTRAP then

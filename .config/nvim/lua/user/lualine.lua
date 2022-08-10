@@ -2,7 +2,6 @@ local status_ok, lualine = pcall(require, "lualine")
 if not status_ok then
 	return
 end
-
 local hide_in_width = function()
 	return vim.fn.winwidth(0) > 80
 end
@@ -16,6 +15,8 @@ local diagnostics = {
 	update_in_insert = false,
 	always_visible = true,
 }
+
+
 
 local diff = {
 	"diff",
@@ -68,13 +69,14 @@ lualine.setup({
 		theme = "everforest",
 		component_separators = { left = "", right = "" },
 		section_separators = { left = "", right = "" },
-		disabled_filetypes = { "dashboard", "NvimTree", "Outline" },
-		always_divide_middle = true,
+		disabled_filetypes = { "dashboard",  "Outline" },
+		always_divide_middle = false,
+    globalstatus = true
 	},
 	sections = {
 		lualine_a = { branch, diagnostics },
 		lualine_b = { mode },
-		lualine_c = {},
+		lualine_c = { { 'filename', path = 1, file_status = true }},
 		-- lualine_x = { "encoding", "fileformat", "filetype" },
 		lualine_x = { diff, spaces, "encoding", filetype },
 		lualine_y = { location },
