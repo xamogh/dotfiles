@@ -7,11 +7,9 @@ local actions = require "telescope.actions"
 
 telescope.setup {
   defaults = {
-
     prompt_prefix = " ",
     selection_caret = " ",
     path_display = { "smart" },
-
     mappings = {
       i = { ["<C-n>"] = actions.cycle_history_next,
         ["<C-p>"] = actions.cycle_history_prev,
@@ -76,6 +74,9 @@ telescope.setup {
       },
     },
   },
+	layout_config = {
+		preview_cutoff = 10,
+	},
   pickers = {
     -- Default configuration for builtin pickers goes here:
     -- picker_name = {

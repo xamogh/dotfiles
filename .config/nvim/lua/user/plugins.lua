@@ -76,6 +76,7 @@ return packer.startup(function(use)
   use "tamago324/nlsp-settings.nvim" -- language server settings defined in json for
   use "jose-elias-alvarez/null-ls.nvim" -- for formatters and linters
   use "jparise/vim-graphql" --gql
+  use "pantharshit00/vim-prisma" --prisma
 
   -- Telescope
   use "nvim-telescope/telescope.nvim"
