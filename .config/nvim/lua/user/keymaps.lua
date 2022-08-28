@@ -10,6 +10,9 @@ keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- Use local config for prettier formatting
+vim.g.neoformat_try_node_exe = 1
+
 -- Modes
 --   normal_mode = "n",
 --   insert_mode = "i",
