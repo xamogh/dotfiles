@@ -57,6 +57,7 @@ return packer.startup(function(use)
   use "mhartington/oceanic-next"
   use "joshdick/onedark.vim"
   use "drewtempelmeyer/palenight.vim"
+  use "sainnhe/gruvbox-material"
 
   -- cmp plugins
   use "hrsh7th/nvim-cmp" -- The completion plugin
