@@ -60,24 +60,9 @@ local i = ls.insert_node
 -- Add the GraphQL snippet
 ls.add_snippets("all", {
   s("gql", {
-    t('const '),
-    i(1, "MUTATION_NAME"),
-    t(' = gql(/* GraphQL */ `'),
-    t({ "", "  mutation " }),
-    i(2, "mutationName"),
-    t('('),
-    i(3, "$var: Type!"),
-    t(') {'),
-    t({ "", "    " }),
-    i(4, "mutationName"),
-    t('(data: { '),
-    i(5, "field: $var"),
-    t(' }) {'),
-    t({ "", "      " }),
-    i(6, "field"),
-    t({ "", "    }" }),
-    t({ "", "  }" }),
-    t({ "", "`);" })
+    t('gql(/* GraphQL */ `'),
+    i(1),
+    t('`);'),
   })
 })
 
@@ -287,14 +272,14 @@ vim.cmd [[augroup END]]
 -- LSP and completion setup
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = { "lua_ls", "pyright", "tsserver", "rust_analyzer", "gopls" },
+  ensure_installed = { "lua_ls", "pyright", "tsserver", "rust_analyzer", "gopls", "graphql" },
   automatic_installation = true,
 })
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 local lspconfig = require('lspconfig')
-local servers = { 'lua_ls', 'pyright', 'tsserver', 'rust_analyzer', 'gopls' }
+local servers = { 'lua_ls', 'pyright', 'tsserver', 'rust_analyzer', 'gopls', "graphql" }
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     capabilities = capabilities,
