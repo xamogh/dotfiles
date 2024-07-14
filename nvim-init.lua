@@ -16,6 +16,10 @@ require('packer').startup(function(use)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
   use 'akinsho/toggleterm.nvim'
+  use({
+    "kylechui/nvim-surround",
+    tag = "*", -- Use for stability; omit to use `main` branch for the latest features
+  })
   use 'nvim-lualine/lualine.nvim'
   use 'folke/tokyonight.nvim'
   use 'jose-elias-alvarez/null-ls.nvim'
@@ -45,6 +49,59 @@ require('packer').startup(function(use)
   end
 end)
 
+-- Snippets
+--
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+
+
+-- Add the GraphQL snippet
+ls.add_snippets("all", {
+  s("gql", {
+    t('const '),
+    i(1, "MUTATION_NAME"),
+    t(' = gql(/* GraphQL */ `'),
+    t({ "", "  mutation " }),
+    i(2, "mutationName"),
+    t('('),
+    i(3, "$var: Type!"),
+    t(') {'),
+    t({ "", "    " }),
+    i(4, "mutationName"),
+    t('(data: { '),
+    i(5, "field: $var"),
+    t(' }) {'),
+    t({ "", "      " }),
+    i(6, "field"),
+    t({ "", "    }" }),
+    t({ "", "  }" }),
+    t({ "", "`);" })
+  })
+})
+
+-- Expand snippet
+vim.keymap.set({ "i", "s" }, "<C-k>", function()
+  if ls.expand_or_jumpable() then
+    ls.expand_or_jump()
+  end
+end, { silent = true })
+
+-- Jump backwards
+vim.keymap.set({ "i", "s" }, "<C-j>", function()
+  if ls.jumpable(-1) then
+    ls.jump(-1)
+  end
+end, { silent = true })
+
+-- Select within a list of options
+vim.keymap.set("i", "<C-l>", function()
+  if ls.choice_active() then
+    ls.change_choice(1)
+  end
+end)
+
 -- General settings
 vim.opt.number = true
 vim.opt.expandtab = true
@@ -66,6 +123,10 @@ local function map(mode, lhs, rhs, opts)
   vim.keymap.set(mode, lhs, rhs, options)
 end
 
+vim.api.nvim_set_keymap('n', '<leader>s', '<Plug>Ysurround', { silent = true })
+vim.api.nvim_set_keymap('n', '<leader>S', '<Plug>YSurround', { silent = true })
+
+
 -- Window resizing
 map('n', '<C-Left>', ':vertical resize -2<CR>')
 map('n', '<C-Right>', ':vertical resize +2<CR>')
@@ -82,11 +143,11 @@ map('n', '<C-k>', '<C-w>k')
 map('n', '<C-l>', '<C-w>l')
 
 -- NvimTree
-map('n', '<C-n>', ':NvimTreeToggle<CR>')
 map('n', '<leader>nt', ':NvimTreeFocusFile<CR>', { desc = "Focus current file in NvimTree" })
+map('n', '<leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true, desc = "Toggle file explorer" })
 
 -- Telescope
-map('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = "Find files" })
+map('n', '<C-p>', '<cmd>Telescope find_files<CR>', { desc = "Find files" })
 map('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = "Live grep" })
 map('n', '<leader>fb', '<cmd>Telescope buffers<CR>', { desc = "Find buffers" })
 map('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', { desc = "Help tags" })
@@ -113,8 +174,10 @@ map('n', 'gr', vim.lsp.buf.references, { desc = "Go to references" })
 map('n', '<leader>f', function() vim.lsp.buf.format { async = true } end, { desc = "Format code" })
 map('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
 map('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
-map('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 map('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+map('n', 'gh', function()
+  vim.diagnostic.open_float(nil, { focus = false, scope = "line" })
+end, { desc = "Show line diagnostics" })
 
 -- Undotree
 map('n', '<leader>u', ':UndotreeToggle<CR>', { desc = "Toggle Undotree" })
@@ -122,7 +185,35 @@ map('n', '<leader>u', ':UndotreeToggle<CR>', { desc = "Toggle Undotree" })
 -- Plugin configurations
 
 -- NvimTree
-require('nvim-tree').setup()
+require('nvim-tree').setup({
+  git = {
+    enable = true,
+    ignore = false,
+    timeout = 500,
+  },
+  renderer = {
+    icons = {
+      glyphs = {
+        git = {
+          unstaged = "M",
+          staged = "✓",
+          unmerged = "",
+          renamed = "➜",
+          untracked = "U",
+          deleted = "x",
+          ignored = "◌",
+        },
+      },
+    },
+  },
+  view = {
+    width = 30,
+    side = 'left',
+  },
+  filters = {
+    dotfiles = false,
+  },
+})
 
 -- Telescope
 local telescope = require('telescope')
@@ -153,7 +244,6 @@ telescope.setup {
 require('nvim-treesitter.configs').setup {
   ensure_installed = "all",
   highlight = { enable = true },
-  autotag = { enable = true },
 }
 
 -- Toggleterm
@@ -162,11 +252,19 @@ require('toggleterm').setup {
   direction = 'float',
 }
 
+
+-- Autotag
+require('nvim-ts-autotag').setup()
+
 -- Lualine
 require('lualine').setup()
 
 -- Color scheme
 vim.cmd [[colorscheme tokyonight]]
+vim.cmd [[
+  highlight FloatBorder guifg=#3d59a1 guibg=#16161e
+  highlight NormalFloat guibg=#16161e
+]]
 
 -- Null-LS (formatting)
 local null_ls = require("null-ls")
@@ -262,10 +360,16 @@ vim.diagnostic.config({
   underline = true,
   update_in_insert = false,
   severity_sort = false,
+  float = {
+    focusable = false,
+    style = "minimal",
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+  },
 })
 
--- Show line diagnostics automatically in hover window
-vim.cmd [[autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]]
 
 -- Gitsigns setup
 require('gitsigns').setup()
@@ -281,6 +385,10 @@ require('nvim-autopairs').setup {}
 
 -- Nvim-ts-autotag setup
 require('nvim-ts-autotag').setup()
+
+-- Vim surroud setup
+require("nvim-surround").setup({
+})
 
 -- Function to focus the current file in NvimTree
 local function focus_file_in_tree()
