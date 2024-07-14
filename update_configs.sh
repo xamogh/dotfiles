@@ -14,7 +14,7 @@ if [[ `git status --porcelain` ]]; then
   # Changes exist, so commit them
   git add .
   git commit -m "Update configurations: $(date +%Y-%m-%d)"
-  git push origin main
+  git push origin master
   echo "Configurations updated and pushed to GitHub."
 else
   # No changes
